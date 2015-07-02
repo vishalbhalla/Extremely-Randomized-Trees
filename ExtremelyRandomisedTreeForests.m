@@ -8,61 +8,66 @@ for nt=1:totalTrees;
     structForest = [structForest; structTree];
 end
 
-
-% patchSize = 15;
-% totalPtsInPatch = patchSize*patchSize;
-% imagePatch1 = [0:totalPtsInPatch-1]./255;
-% imagePatch2 = [0:totalPtsInPatch-1]./255;
-% imagePatch3 = [0:totalPtsInPatch-1]./1000;
-
-
-% patchPairMatrix = [];
-% patchPairMatrix = [patchPairMatrix ; imagePatch1,imagePatch2];
-% patchPairMatrix = [patchPairMatrix ; imagePatch1,imagePatch3];
-% patchPairMatrix = [patchPairMatrix ; imagePatch2,imagePatch3];
-% alignedPatchPairVec = [];
-% alignedPatchPairVec = [alignedPatchPairVec ; 1];
-% alignedPatchPairVec = [alignedPatchPairVec ; 0];
-% alignedPatchPairVec = [alignedPatchPairVec ; 0];
-noPatches = 10;
+noPatches = 20;
 
 % Code Vectors
 X = [];
 
 patchSize= 15;
 totalPtsInPatch = patchSize*patchSize;
-pixel_position_x = 72;
-pixel_position_y = 72;
-noOfSample = 20;
-% imagePath1 = strcat('/Users/chingyukao/Documents/MATLAB/Multi-Modal-Similarity-till-08062015/Multi-Modal-Similarity/Dataset/','T1_11.TIFF')
-% imagePath2 = strcat('/Users/chingyukao/Documents/MATLAB/Multi-Modal-Similarity-till-08062015/Multi-Modal-Similarity/Dataset/','T2_11.TIFF')
-
-imagePath1 = strcat('E:\TUM\Courses\Summer Semester 2015\Machine Learning in Medical Imaging\Project\Multi-Modal-Similarity\Dataset\','T1_11.TIFF');
-imagePath2 = strcat('E:\TUM\Courses\Summer Semester 2015\Machine Learning in Medical Imaging\Project\Multi-Modal-Similarity\Dataset\','T2_11.TIFF');
+pixel_position_x = randi(256);
+pixel_position_y = randi(256);
+noOfSample = noPatches+1;
 
 
-[similarPatches,disSimilarPatches] = extractPatchesPerPixel(imagePath1, imagePath2, pixel_position_x, pixel_position_y, patchSize, noOfSample);
+% base_T1 = '/Users/chingyukao/Documents/MATLAB/Multi-Modal-Similarity-till-08062015/Multi-Modal-Similarity/Dataset/T1_';
+% base_T2 = '/Users/chingyukao/Documents/MATLAB/Multi-Modal-Similarity-till-08062015/Multi-Modal-Similarity/Dataset/T2_';
 
-similarPatches = reshape(cell2mat(similarPatches),[noPatches,2*patchSize*patchSize]); %convert cell to matrix
-disSimilarPatches = reshape(cell2mat(disSimilarPatches),[noPatches,2*patchSize*patchSize]);%convert cell to matrix
-patchPairMatrix = [similarPatches;disSimilarPatches];
-boolAlignedInd = zeros(size(patchPairMatrix,1),1);
-boolAlignedInd(1:10) = 1;
-patchPairMatrix = [patchPairMatrix boolAlignedInd];
+base_T1 = 'E:\TUM\Courses\Summer Semester 2015\Machine Learning in Medical Imaging\Project\Extremely Randomized Trees\Dataset\T1_';
+base_T2 = 'E:\TUM\Courses\Summer Semester 2015\Machine Learning in Medical Imaging\Project\Extremely Randomized Trees\Dataset\T2_';
+
+patchPairMatrix = [];
+for i = 1:12
+    %path = strcat(base,num2str(i),'.TIFF');
+    if( i ~= 8)
+    if(i<10)
+        j = strcat('0',num2str(i));
+    end
+        
+    imagePath1 = strcat(base_T1,num2str(j),'.TIFF');
+    imagePath2 = strcat(base_T2,num2str(j),'.TIFF');
+    
+
+    noOfPosPatches = 10;
+
+for p = 1:noOfPosPatches
+    pixel_position_x = randi(256);
+    pixel_position_y = randi(256);
+    [similarPatches,disSimilarPatches] = extractPatchesPerPixel(imagePath1, imagePath2, pixel_position_x, pixel_position_y, patchSize, noOfSample);
+    similarPatches = reshape(cell2mat(similarPatches),[1,2*patchSize*patchSize]); %convert cell to matrix
+    disSimilarPatches = reshape(cell2mat(disSimilarPatches),[noPatches,2*patchSize*patchSize]);%convert cell to matrix
+    temp = [similarPatches; disSimilarPatches];
+    
+    boolAlignedInd = zeros(noOfSample,1);
+    boolAlignedInd(1) = 1;
+    temp = [temp boolAlignedInd];
+    patchPairMatrix = [patchPairMatrix; temp];
+end
+    end
+end
 
 
-for np = 1:noPatches
-%      imagePatch1 = patchPairMatrix(np,1:totalPtsInPatch);
-%      imagePatch2 = patchPairMatrix(np,totalPtsInPatch+1:end-1);
-     
+%% the following code for 10 aligned patches, and each have 10 misaligned pathches(totally 100 misaligned patches accordingly).
+
+boolAlignedInd = patchPairMatrix(:,end);
+
+for np = 1:noOfSample*noOfPosPatches
      imagePatch1 = double(patchPairMatrix(np,1:totalPtsInPatch))./255;
-     imagePatch2 = double( patchPairMatrix(np,totalPtsInPatch+1:end-1))./255;
-     
-     boolAligned = patchPairMatrix(end);
-     X1 = [];
+     imagePatch2 = double(patchPairMatrix(np,totalPtsInPatch+1:end-1))./255;
+     boolAligned = boolAlignedInd(np);
+     X1 = [] ;
     for nt=1:totalTrees;
         structTree = structForest{nt};
-        
         [structTree, x] = QuantisizeImagePair(imagePatch1, imagePatch2, boolAligned, structTree);
         structForest{nt} = structTree;
         X1 = [X1, x];
@@ -73,4 +78,15 @@ for np = 1:noPatches
 end
 
 % After finding vector X for each patch pair, use it to define how significant the leaf was.
+% Now calculate the weights for each leaf in every tree of the forest.
+Weights = [];
+for nt=1:totalTrees;
+    structTree = structForest{nt};
+    w = CalculateWeights(structTree);
+    Weights = [Weights, w];
+end
+
+%Use the weights to define the similarity measure of the test data set.
+
+
 
