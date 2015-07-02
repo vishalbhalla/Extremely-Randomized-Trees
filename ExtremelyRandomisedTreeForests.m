@@ -83,7 +83,7 @@ end
 Weights = [];
 for nt=1:totalTreesInForest;
     structTree = structForest{nt};
-    w = CalculateWeights(structTree);
+    w = CalculateWeights(structTree, treeDepth, noTreeNodes);
     Weights = [Weights, w];
 end
 

@@ -1,10 +1,11 @@
-function weight = CalculateWeights(structTree)
+function weight = CalculateWeights(structTree, treeDepth, noTreeNodes)
 %CALCULATEWEIGHTS Summary of this function goes here
 %QUANTISIZEIMAGEPAIR Summary of this function goes here
 %   Detailed explanation goes here
 patchAtLeaf = 0;
 nodeIdx = 1; % Root node of the tree.
-while (nodeIdx ~= 8)
+leafStart = 2^(treeDepth-1) + 1;
+while (nodeIdx ~= leafStart)
     RightNodeNo = structTree(nodeIdx).RightNodeNo;
     LeftNodeNo = structTree(nodeIdx).LeftNodeNo;
     if(LeftNodeNo ~=0 &&  RightNodeNo ~= 0)
@@ -13,7 +14,7 @@ while (nodeIdx ~= 8)
 end
 
 w = [];
-while (nodeIdx ~= 15+1)
+while (nodeIdx ~= (noTreeNodes + 1))
     totalAlignedMisAlignedPatches = structTree(nodeIdx).WeightAlignedPatchIdx + structTree(nodeIdx).WeightMisAlignedPatchIdx;
     if(totalAlignedMisAlignedPatches == 0)
         w = [w,0];
