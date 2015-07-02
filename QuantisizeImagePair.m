@@ -1,4 +1,4 @@
-function [structTree, X] = QuantisizeImagePair(imagePatch1, imagePatch2, boolAligned, structTree)
+function [structTree, X] = QuantisizeImagePair(imagePatch1, imagePatch2, boolAligned, structTree, lastNodeNo)
 %QUANTISIZEIMAGEPAIR Summary of this function goes here
 %   Detailed explanation goes here
 patchAtLeaf = 0;
@@ -32,7 +32,7 @@ while nodeIdx ~= 0
 
         % Now parent points to the first or the leftmost leaf. Return code vector.
         X = [];
-        while (parent ~= 15+1)
+        while (parent ~= (lastNodeNo +1))
             %X = [X, structTree(parent).AlignedPatchIdx];
             
             if(parent ~= patchAtLeaf)

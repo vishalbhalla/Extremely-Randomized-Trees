@@ -1,30 +1,31 @@
 
+%% Pick up the parameters from the config file.
+[patchSize, treeDepth, noTreeNodes, noOfPosPatches, noPatches, noOfSample, totalTreesInForest, trainingDataPath, testDataPath] = TuningParametersConfig();
+
 % Extremely Randomised Forests - Ensemble of Trees.
-totalTrees = 10;
 structForest = {};
 
-for nt=1:totalTrees;
-    structTree = constructTree();
+for nt=1:totalTreesInForest;
+    structTree = constructTree(noTreeNodes, patchSize);
     structForest = [structForest; structTree];
 end
 
-noPatches = 20;
+%noPatches = 20;
 
 % Code Vectors
 X = [];
 
-patchSize= 15;
+%patchSize= 15;
 totalPtsInPatch = patchSize*patchSize;
 pixel_position_x = randi(256);
 pixel_position_y = randi(256);
-noOfSample = noPatches+1;
+%noOfSample = noPatches+1;
 
+base_T1 = strcat(trainingDataPath, 'T1_');
+base_T2 = strcat(trainingDataPath, 'T2_');
 
-% base_T1 = '/Users/chingyukao/Documents/MATLAB/Multi-Modal-Similarity-till-08062015/Multi-Modal-Similarity/Dataset/T1_';
-% base_T2 = '/Users/chingyukao/Documents/MATLAB/Multi-Modal-Similarity-till-08062015/Multi-Modal-Similarity/Dataset/T2_';
-
-base_T1 = 'E:\TUM\Courses\Summer Semester 2015\Machine Learning in Medical Imaging\Project\Extremely Randomized Trees\Dataset\T1_';
-base_T2 = 'E:\TUM\Courses\Summer Semester 2015\Machine Learning in Medical Imaging\Project\Extremely Randomized Trees\Dataset\T2_';
+% base_T1 = 'E:\TUM\Courses\Summer Semester 2015\Machine Learning in Medical Imaging\Project\Extremely Randomized Trees\Dataset\T1_';
+% base_T2 = 'E:\TUM\Courses\Summer Semester 2015\Machine Learning in Medical Imaging\Project\Extremely Randomized Trees\Dataset\T2_';
 
 patchPairMatrix = [];
 for i = 1:12
@@ -38,7 +39,7 @@ for i = 1:12
     imagePath2 = strcat(base_T2,num2str(j),'.TIFF');
     
 
-    noOfPosPatches = 10;
+    %noOfPosPatches = 10;
 
 for p = 1:noOfPosPatches
     pixel_position_x = randi(256);
@@ -65,22 +66,22 @@ for np = 1:noOfSample*noOfPosPatches
      imagePatch1 = double(patchPairMatrix(np,1:totalPtsInPatch))./255;
      imagePatch2 = double(patchPairMatrix(np,totalPtsInPatch+1:end-1))./255;
      boolAligned = boolAlignedInd(np);
-     X1 = [] ;
-    for nt=1:totalTrees;
+     XCodeVecPatchPair = [] ;
+    for nt=1:totalTreesInForest;
         structTree = structForest{nt};
-        [structTree, x] = QuantisizeImagePair(imagePatch1, imagePatch2, boolAligned, structTree);
+        [structTree, x] = QuantisizeImagePair(imagePatch1, imagePatch2, boolAligned, structTree, noTreeNodes);
         structForest{nt} = structTree;
-        X1 = [X1, x];
+        XCodeVecPatchPair = [XCodeVecPatchPair, x];
     end
     
-    X = [X; X1];
+    X = [X; XCodeVecPatchPair];
     % Now iterate over the leaves of each tree in the Forest for this particular patch pair to find the vector X.
 end
 
 % After finding vector X for each patch pair, use it to define how significant the leaf was.
 % Now calculate the weights for each leaf in every tree of the forest.
 Weights = [];
-for nt=1:totalTrees;
+for nt=1:totalTreesInForest;
     structTree = structForest{nt};
     w = CalculateWeights(structTree);
     Weights = [Weights, w];

@@ -14,7 +14,12 @@ end
 
 w = [];
 while (nodeIdx ~= 15+1)
-    w = [w, structTree(nodeIdx).WeightAlignedPatchIdx/(structTree(nodeIdx).WeightAlignedPatchIdx + structTree(nodeIdx).WeightMisAlignedPatchIdx)];
+    totalAlignedMisAlignedPatches = structTree(nodeIdx).WeightAlignedPatchIdx + structTree(nodeIdx).WeightMisAlignedPatchIdx;
+    if(totalAlignedMisAlignedPatches == 0)
+        w = [w,0];
+    else
+        w = [w, structTree(nodeIdx).WeightAlignedPatchIdx/totalAlignedMisAlignedPatches];
+    end
     nodeIdx = nodeIdx + 1;
 end
 

@@ -1,10 +1,4 @@
-function [ similarity, disSimilarity ] = extractPatchesPerPixel(imgPath1, imgPath2, pixel_i, pixel_j, patchSize,noOfsample )
-%img1 = dlmread('image1.txt')
-%img2 = dlmread('image2.txt')
-
-%img1 = imread('/Users/chingyukao/Documents/MATLAB/Multi-Modal-Similarity-till-08062015/Multi-Modal-Similarity/Dataset/T1_11.TIFF');
-%img2 = imread('/Users/chingyukao/Documents/MATLAB/Multi-Modal-Similarity-till-08062015/Multi-Modal-Similarity/Dataset/T2_11.TIFF');
-
+function [similarity, disSimilarity] = extractPatchesPerPixel(imgPath1, imgPath2, pixel_i, pixel_j, patchSize, noOfsample)
 
 img1 = imread(imgPath1);
 img2 = imread(imgPath2);
@@ -23,7 +17,7 @@ img2 = padarray(img2,[index,index]) ;
 %    i = i + randi(255)
 %    j = j + randi(255)
     
-while(i - index <= 1 || i > 255 ) 
+while(i - index <= 1 || i > 255 )  
    i = i + randi(255);
    i = mod(i,256);
 
@@ -34,8 +28,6 @@ while (j - index <= 1 || j > 255)
     j = mod(j,256);
 
 end
-
-
 
 matrix1 = img1(i-index+1:i+index+1,j-index+1:j+index+1);
 matrix2 = img2(i-index+1:i+index+1,j-index+1:j+index+1);
@@ -51,12 +43,12 @@ for k = 1:noOfNegSample-1
     i_new = i+randi(256);
     j_new = j+randi(256);
   
-    while(i_new > 256 | i_new == i | i_new - index < 1 )
+    while(i_new > 256 || i_new == i || i_new - index < 1 )
         i_new = i_new+randi(256);
         i_new = mod(i_new,256);
  
     end
-    while(j_new > 256| j_new == j | j_new - index < 1 )
+    while(j_new > 256 || j_new == j || j_new - index < 1 )
         j_new = j_new+randi(256);
         j_new = mod(j_new,256);
 
@@ -70,9 +62,6 @@ for k = 1:noOfNegSample-1
     %disSimilarity{k} = conc_matrix_disSimilarity
   
 end
-
-
-%end
 
 end
 
