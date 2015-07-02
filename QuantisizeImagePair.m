@@ -1,7 +1,7 @@
 function [structTree, X] = QuantisizeImagePair(imagePatch1, imagePatch2, boolAligned, structTree)
 %QUANTISIZEIMAGEPAIR Summary of this function goes here
 %   Detailed explanation goes here
-
+patchAtLeaf = 0;
 nodeIdx = 1; % Root node of the tree.
 while nodeIdx ~= 0
     threshold = structTree(nodeIdx).Threshold;
@@ -13,16 +13,18 @@ while nodeIdx ~= 0
         nodeIdx = structTree(nodeIdx).LeftNodeNo;
     end
     
-    % Leaf Node
-    % Add count to aligned or misaligned patch for this node in the tree data structure.
+    % Leaf Node where the patch currently lies is set to 1.
+    patchAtLeaf = parent;
+    % Add weight of the aligned or misaligned patch for this node in the tree data structure.
     if (nodeIdx == 0)
         if(boolAligned)
-            structTree(parent).AlignedPatchIdx = structTree(parent).AlignedPatchIdx + 1;
+            structTree(parent).AlignedPatchIdx = 1;
+            structTree(parent).WeightAlignedPatchIdx = structTree(parent).WeightAlignedPatchIdx + 1;
         else
-            structTree(parent).MisAlignedPatchIdx = structTree(parent).MisAlignedPatchIdx + 1;
+            structTree(parent).MisAlignedPatchIdx = 1;
+            structTree(parent).WeightMisAlignedPatchIdx = structTree(parent).WeightMisAlignedPatchIdx + 1;
         end
-        structTree(parent).PatchPairNo = structTree(parent).PatchPairNo + 1;
-        
+
         while (structTree(parent).LeftNodeNo ==0 && structTree(parent).RightNodeNo ==0)
             parent = parent - 1;
         end
@@ -31,7 +33,19 @@ while nodeIdx ~= 0
         % Now parent points to the first or the leftmost leaf. Return code vector.
         X = [];
         while (parent ~= 15+1)
-            X = [X, structTree(parent).AlignedPatchIdx];
+            %X = [X, structTree(parent).AlignedPatchIdx];
+            
+            if(parent ~= patchAtLeaf)
+                X = [X, 0];
+            else
+                X = [X, 1];
+            end
+%             
+%             if(boolAligned)
+%                 X = [X, structTree(parent).AlignedPatchIdx];
+%             else
+%                 X = [X, structTree(parent).MisAlignedPatchIdx];
+%             end
             parent = parent + 1;
         end
     end

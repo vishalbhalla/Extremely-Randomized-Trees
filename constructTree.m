@@ -8,15 +8,16 @@ LeftNodeNo = 'LeftNodeNo';
 RightNodeNo = 'RightNodeNo';
 Threshold = 'Threshold';
 Feature = 'Feature';
-PatchPairNo = 'PatchPairNo';
 AlignedPatchIdx = 'AlignedPatchIdx';
+WeightAlignedPatchIdx = 'WeightAlignedPatchIdx';
 MisAlignedPatchIdx = 'MisAlignedPatchIdx';
+WeightMisAlignedPatchIdx = 'WeightMisAlignedPatchIdx';
 
 parent = 1;
-s = struct(NodeNo,1,LeftNodeNo,parent+1,RightNodeNo,parent+2,PatchPairNo,0,Threshold,rand(1),Feature,randi(225),AlignedPatchIdx,0,MisAlignedPatchIdx,0);
+s = struct(NodeNo,1,LeftNodeNo,parent+1,RightNodeNo,parent+2,Threshold,rand(1),Feature,randi(225),AlignedPatchIdx,0,WeightAlignedPatchIdx,0,MisAlignedPatchIdx,0,WeightMisAlignedPatchIdx,0);
 structTree = [structTree; s];
 
-intNodeNo = 2;
+%intNodeNo = 2;
 
 d = 3; % Depth of the tree
 n = 2^(d+1) -1; % Total No. of nodes.
@@ -27,8 +28,6 @@ for i = 2:n
         intNodeNo = parent; 
         threshold = rand(1);
         feature = randi(225);
-        intPatchPairNo = i;
-        intAlignedPatchIdx = i;
         valNodeNo = intNodeNo;
         
         if(2*intNodeNo>n)
@@ -38,11 +37,8 @@ for i = 2:n
             valLeftNodeNo = 2*intNodeNo;
             valRightNodeNo = 2*intNodeNo +1;
         end
-        valPatchPairNo = 0;
-        valAlignedPatchIdx = 0;
-        valMisAlignedPatchIdx = 0;
 
-        s = struct(NodeNo,valNodeNo,LeftNodeNo,valLeftNodeNo,RightNodeNo,valRightNodeNo,PatchPairNo,0,Threshold,threshold,Feature,feature,AlignedPatchIdx,0,MisAlignedPatchIdx,0);
+        s = struct(NodeNo,valNodeNo,LeftNodeNo,valLeftNodeNo,RightNodeNo,valRightNodeNo,Threshold,threshold,Feature,feature,AlignedPatchIdx,0,WeightAlignedPatchIdx,0,MisAlignedPatchIdx,0,WeightMisAlignedPatchIdx,0);
         structTree = [structTree; s];
     %end
 end
