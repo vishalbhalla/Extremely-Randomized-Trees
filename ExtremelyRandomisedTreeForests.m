@@ -139,13 +139,15 @@ end
 
 predictedSimilarity = XTest * Weights';
 
+% Normalise over the number of trees such that the final similarity value is between 0 and 1.
+predNormalizedSimilarity = predictedSimilarity./(2^treeDepth);
 
 %% Evaluation - Performance Measures!
 
 %% =========== Classification - Confusion Matrix =============
 % Define the vectors for the ground truth and the predicted class for each sample.
 groundTruth = testGroundTruthSimilarity; %[1,0,0,1,0,0,1,1,0,1,0,0,1,1,0,0,1,1,0,1,0,1]';
-Predictions = predictedSimilarity; %[0.6,0.2,0.3,0.5,0.9,0.8,0.6,0.3,0.1,0.2,0.1,0.5,0.8,0.1,0.3,0.7,0.8,0.2,0.4,0.4,0.5,0.4]';
+Predictions = predNormalizedSimilarity; %predictedSimilarity; %[0.6,0.2,0.3,0.5,0.9,0.8,0.6,0.3,0.1,0.2,0.1,0.5,0.8,0.1,0.3,0.7,0.8,0.2,0.4,0.4,0.5,0.4]';
 
 
 thresholdVec = [0,0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9,1];
