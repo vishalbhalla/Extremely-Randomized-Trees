@@ -141,6 +141,7 @@ predictedSimilarity = XTest * Weights';
 
 % Normalise over the number of trees such that the final similarity value is between 0 and 1.
 predNormalizedSimilarity = predictedSimilarity./(2^treeDepth);
+predNormalizedSimilarity = (predNormalizedSimilarity + 1)./2;
 
 %% Evaluation - Performance Measures!
 
