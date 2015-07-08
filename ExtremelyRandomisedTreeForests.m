@@ -86,8 +86,9 @@ end
 Weights = [];
 for nt=1:totalTreesInForest;
     structTree = structForest{nt};
-    w = CalculateWeights(structTree, treeDepth, noTreeNodes);
+    [w, structRemovedLeavesTree] = CalculateWeightsTest(structTree, treeDepth, noTreeNodes);
     Weights = [Weights, w];
+    structForest{nt} = structRemovedLeavesTree;
 end
 
 
@@ -128,7 +129,7 @@ for np = 1:noOfTestSample
     for nt=1:totalTreesInForest
         structTree = structForest{nt};
         [structTree, x] = QuantisizeImagePair(imagePatch1, imagePatch2, boolAligned, structTree, treeDepth, noTreeNodes);
-        structForest{nt} = structTree;
+        %structForest{nt} = structTree;
         XTestCodeVecPatchPair = [XTestCodeVecPatchPair, x];
     end
     
@@ -141,7 +142,6 @@ predictedSimilarity = XTest * Weights';
 
 % Normalise over the number of trees such that the final similarity value is between 0 and 1.
 predNormalizedSimilarity = predictedSimilarity./(2^treeDepth);
-predNormalizedSimilarity = (predNormalizedSimilarity + 1)./2;
 
 %% Evaluation - Performance Measures!
 
