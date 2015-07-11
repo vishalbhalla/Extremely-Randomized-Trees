@@ -27,9 +27,6 @@ pixel_position_y = randi(256);
 base_T1 = strcat(trainingDataPath, 'T1_');
 base_T2 = strcat(trainingDataPath, 'T2_');
 
-% base_T1 = 'E:\TUM\Courses\Summer Semester 2015\Machine Learning in Medical Imaging\Project\Extremely Randomized Trees\Dataset\T1_';
-% base_T2 = 'E:\TUM\Courses\Summer Semester 2015\Machine Learning in Medical Imaging\Project\Extremely Randomized Trees\Dataset\T2_';
-
 patchPairMatrix = [];
 for i = 1:12
     %path = strcat(base,num2str(i),'.TIFF');
@@ -41,13 +38,16 @@ for i = 1:12
     imagePath1 = strcat(base_T1,num2str(j),'.TIFF');
     imagePath2 = strcat(base_T2,num2str(j),'.TIFF');
     
+    ImageModality1 = imread(imagePath1);
+    ImageModality2 = imread(imagePath2);
 
     %noOfPosPatches = 10;
 
 for p = 1:noOfPosPatches
     pixel_position_x = randi(256);
     pixel_position_y = randi(256);
-    [similarPatches,disSimilarPatches] = extractPatchesPerPixel(imagePath1, imagePath2, pixel_position_x, pixel_position_y, patchSize, noOfSample);
+    %[similarPatches,disSimilarPatches] = extractPatchesPerPixel(imagePath1, imagePath2, pixel_position_x, pixel_position_y, patchSize, noOfSample);
+    [similarPatches,disSimilarPatches] = extractPatchesPerPixel(ImageModality1, ImageModality2, pixel_position_x, pixel_position_y, patchSize, noOfSample);
     similarPatches = reshape(cell2mat(similarPatches),[1,2*patchSize*patchSize]); %convert cell to matrix
     disSimilarPatches = reshape(cell2mat(disSimilarPatches),[noPatches,2*patchSize*patchSize]);%convert cell to matrix
     temp = [similarPatches; disSimilarPatches];
@@ -95,61 +95,114 @@ end
 %% Test
 %Use the weights to define the similarity measure of the test data set.
 
-patchPairMatrix = [];
-testGroundTruthSimilarity = [];
-for i = 10:12
-    
-    imagePath1 = strcat(base_T1,num2str(j),'.TIFF');
-    imagePath2 = strcat(base_T2,num2str(j),'.TIFF');
+% patchPairMatrix = [];
+% testGroundTruthSimilarity = [];
+% for i = 10:12
+%     
+%     imagePath1 = strcat(base_T1,num2str(j),'.TIFF');
+%     imagePath2 = strcat(base_T2,num2str(j),'.TIFF');
+% 
+%     for p = 1:noOfPosPatches
+%         pixel_position_x = randi(256);
+%         pixel_position_y = randi(256);
+%         [similarPatches,disSimilarPatches] = extractPatchesPerPixel(imagePath1, imagePath2, pixel_position_x, pixel_position_y, patchSize, noOfSample);
+%         similarPatches = reshape(cell2mat(similarPatches),[1,2*patchSize*patchSize]); %convert cell to matrix
+%         disSimilarPatches = reshape(cell2mat(disSimilarPatches),[noPatches,2*patchSize*patchSize]);%convert cell to matrix
+%         temp = [similarPatches; disSimilarPatches];
+% 
+%         boolAlignedInd = zeros(noOfSample,1);
+%         boolAlignedInd(1) = 1;
+%         temp = [temp boolAlignedInd];
+%         testGroundTruthSimilarity = [testGroundTruthSimilarity; boolAlignedInd];
+%         patchPairMatrix = [patchPairMatrix; temp];
+%     end
+% end
+% 
+% boolAlignedInd = patchPairMatrix(:,end);
+% XTest = [];
+% noOfTestSample = size(patchPairMatrix,1);
+% for np = 1:noOfTestSample
+%     imagePatch1 = double(patchPairMatrix(np,1:totalPtsInPatch))./255;
+%     imagePatch2 = double(patchPairMatrix(np,totalPtsInPatch+1:end-1))./255;
+%     boolAligned = boolAlignedInd(np);
+%     XTestCodeVecPatchPair = [] ;
+%     for nt=1:totalTreesInForest
+%         structTree = structForest{nt};
+%         [structTree, x] = QuantisizeImagePair(imagePatch1, imagePatch2, boolAligned, structTree, treeDepth, noTreeNodes);
+%         %structForest{nt} = structTree;
+%         XTestCodeVecPatchPair = [XTestCodeVecPatchPair, x];
+%     end
+%     
+%     XTest = [XTest; XTestCodeVecPatchPair];
+%     % Now iterate over the leaves of each tree in the Forest for this particular patch pair to find the vector X.
+% end
 
-    for p = 1:noOfPosPatches
-        pixel_position_x = randi(256);
-        pixel_position_y = randi(256);
-        [similarPatches,disSimilarPatches] = extractPatchesPerPixel(imagePath1, imagePath2, pixel_position_x, pixel_position_y, patchSize, noOfSample);
-        similarPatches = reshape(cell2mat(similarPatches),[1,2*patchSize*patchSize]); %convert cell to matrix
-        disSimilarPatches = reshape(cell2mat(disSimilarPatches),[noPatches,2*patchSize*patchSize]);%convert cell to matrix
-        temp = [similarPatches; disSimilarPatches];
 
-        boolAlignedInd = zeros(noOfSample,1);
-        boolAlignedInd(1) = 1;
-        temp = [temp boolAlignedInd];
-        testGroundTruthSimilarity = [testGroundTruthSimilarity; boolAlignedInd];
-        patchPairMatrix = [patchPairMatrix; temp];
-    end
-end
-
-boolAlignedInd = patchPairMatrix(:,end);
+%% Testing
 XTest = [];
-noOfTestSample = size(patchPairMatrix,1);
-for np = 1:noOfTestSample
-    imagePatch1 = double(patchPairMatrix(np,1:totalPtsInPatch))./255;
-    imagePatch2 = double(patchPairMatrix(np,totalPtsInPatch+1:end-1))./255;
-    boolAligned = boolAlignedInd(np);
-    XTestCodeVecPatchPair = [] ;
-    for nt=1:totalTreesInForest
-        structTree = structForest{nt};
-        [structTree, x] = QuantisizeImagePair(imagePatch1, imagePatch2, boolAligned, structTree, treeDepth, noTreeNodes);
-        %structForest{nt} = structTree;
-        XTestCodeVecPatchPair = [XTestCodeVecPatchPair, x];
-    end
+TestGroundTruthSimilarity = [];
+
+% Perform Transformations on Image for Testing.
+translations = [[-60,-60];[-50,-50];[-40,-40];[-30,-30];[-20,-20];[-10,-10];[0,0];[10,10];[20,20];[30,30];[40,40];[50,50];[60,60]];
+totalTransformations = size(translations,1);
+
+rotations = [-90;-75;-60;-45;-30;-15;0;15;30;45;60;75;90];
+
+translationSimilarity = [];
+rotationSimilarity = [];
+
+for t=1:totalTransformations
+    % Translation of Image
+    boolTranslationRotation = true;
+    [XTransTest, transGroundTruthSimilarity] = SimilarityTestImage(base_T1, patchSize, noPatches, noOfPosPatches, noOfSample, treeDepth, noTreeNodes, totalTreesInForest, structForest, boolTranslationRotation, translations(t,:));
+    XTest = [XTest; XTransTest];
+    TestGroundTruthSimilarity = [TestGroundTruthSimilarity; transGroundTruthSimilarity];
     
-    XTest = [XTest; XTestCodeVecPatchPair];
-    % Now iterate over the leaves of each tree in the Forest for this particular patch pair to find the vector X.
+    predTransSimilarity = XTransTest * Weights';
+    % Normalise over the number of trees such that the final similarity value is between 0 and 1.
+    predNormTransSimilarity = predTransSimilarity./(2^treeDepth);
+    meanTransSimilarity = mean(predNormTransSimilarity);
+    translationSimilarity = [translationSimilarity; meanTransSimilarity];
+
+    
+    % Rotation of Image
+    boolTranslationRotation = false;
+    [XRotTest, rotGroundTruthSimilarity] = SimilarityTestImage(base_T1, patchSize, noPatches, noOfPosPatches, noOfSample, treeDepth, noTreeNodes, totalTreesInForest, structForest, boolTranslationRotation, rotations(t));
+    XTest = [XTest; XRotTest];
+    TestGroundTruthSimilarity = [TestGroundTruthSimilarity; rotGroundTruthSimilarity];
+    
+    predRotSimilarity = XRotTest * Weights';
+    % Normalise over the number of trees such that the final similarity value is between 0 and 1.
+    predNormRotSimilarity = predRotSimilarity./(2^treeDepth);
+    meanRotSimilarity = mean(predNormRotSimilarity);
+    rotationSimilarity = [rotationSimilarity; meanRotSimilarity];
 end
 
+%% Capture-Range Plot
+figure(1);
+plot(translations(:,1),translationSimilarity);
+%title('Translational-Similarity Capture-Range Plot');
+xlabel('Translations');
+ylabel('0 \leq Similarity \leq 1');
+
+figure(2);
+plot(rotations,rotationSimilarity);
+%title('Rotational-Similarity Capture-Range Plot');
+xlabel('Rotations');
+ylabel('0 \leq Similarity \leq 1');
 
 predictedSimilarity = XTest * Weights';
 
 % Normalise over the number of trees such that the final similarity value is between 0 and 1.
-predNormalizedSimilarity = predictedSimilarity./(2^treeDepth);
+predNormSimilarity = predictedSimilarity./(2^treeDepth);
+
 
 %% Evaluation - Performance Measures!
 
 %% =========== Classification - Confusion Matrix =============
 % Define the vectors for the ground truth and the predicted class for each sample.
-groundTruth = testGroundTruthSimilarity; %[1,0,0,1,0,0,1,1,0,1,0,0,1,1,0,0,1,1,0,1,0,1]';
-Predictions = predNormalizedSimilarity; %predictedSimilarity; %[0.6,0.2,0.3,0.5,0.9,0.8,0.6,0.3,0.1,0.2,0.1,0.5,0.8,0.1,0.3,0.7,0.8,0.2,0.4,0.4,0.5,0.4]';
-
+groundTruth = TestGroundTruthSimilarity; %[1,0,0,1,0,0,1,1,0,1,0,0,1,1,0,0,1,1,0,1,0,1]';
+Predictions = predNormSimilarity; %predictedSimilarity; %[0.6,0.2,0.3,0.5,0.9,0.8,0.6,0.3,0.1,0.2,0.1,0.5,0.8,0.1,0.3,0.7,0.8,0.2,0.4,0.4,0.5,0.4]';
 
 thresholdVec = [0,0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9,1];
 totalThresholds = size(thresholdVec,2);
@@ -184,14 +237,16 @@ end
 
 % Part a. ROC
 % False positive rate = 1 - Specificity
-figure(1);
+figure(3);
 plot(1 - specificityVec, sensitivityVec);
 title('ROC');
 
 % Part b. Precision-Recall curve
 % Precision = Positive predictive value (PPV)
 % Recall = Sensitivity !!
-figure(2);
+figure(4);
 plot(PPVVec, sensitivityVec);
 title('Precision-Recall curve');
+
+
 

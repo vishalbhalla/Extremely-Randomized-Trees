@@ -1,4 +1,4 @@
-function [XTest, meanTransSimilarity, testGroundTruthSimilarity] = SimilarityTestImage(base_T1, patchSize, noPatches, noOfPosPatches, noOfSample, treeDepth, noTreeNodes, totalTreesInForest, structForest, Weights, boolTranslationRotation, transform)
+function [XTest, testGroundTruthSimilarity] = SimilarityTestImage(base_T1, patchSize, noPatches, noOfPosPatches, noOfSample, treeDepth, noTreeNodes, totalTreesInForest, structForest, boolTranslationRotation, transform)
 
 patchPairMatrix = [];
 testGroundTruthSimilarity = [];  
@@ -44,11 +44,6 @@ for np = 1:noOfTestSample
     XTest = [XTest; XTestCodeVecPatchPair];
     % Now iterate over the leaves of each tree in the Forest for this particular patch pair to find the vector X.
 end
-
-predTransSimilarity = XTest * Weights';
-% Normalise over the number of trees such that the final similarity value is between 0 and 1.
-predNormTransSimilarity = predTransSimilarity./(2^treeDepth);
-meanTransSimilarity = mean(predNormTransSimilarity);
 
 end
 

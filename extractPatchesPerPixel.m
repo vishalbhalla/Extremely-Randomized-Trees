@@ -1,7 +1,12 @@
-function [similarity, disSimilarity] = extractPatchesPerPixel(imgPath1, imgPath2, pixel_i, pixel_j, patchSize, noOfsample)
+%function [similarity, disSimilarity] = extractPatchesPerPixel(imgPath1, imgPath2, pixel_i, pixel_j, patchSize, noOfsample)
+function [similarity, disSimilarity] = extractPatchesPerPixel(originalImage, transformedImage, pixel_i, pixel_j, patchSize, noOfsample)
 
-img1 = imread(imgPath1);
-img2 = imread(imgPath2);
+% img1 = imread(imgPath1);
+% img2 = imread(imgPath2);
+
+img1 = originalImage;
+img2 = transformedImage;
+
 i = pixel_i;
 j = pixel_j;
 
