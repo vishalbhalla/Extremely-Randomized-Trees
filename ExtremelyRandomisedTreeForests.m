@@ -181,15 +181,15 @@ end
 %% Capture-Range Plot
 figure(1);
 plot(translations(:,1),translationSimilarity);
-%title('Translational-Similarity Capture-Range Plot');
 xlabel('Translations');
 ylabel('0 \leq Similarity \leq 1');
+title('Capture-Range Plot for Translational Similarity');
 
 figure(2);
 plot(rotations,rotationSimilarity);
-%title('Rotational-Similarity Capture-Range Plot');
 xlabel('Rotations');
 ylabel('0 \leq Similarity \leq 1');
+title('Capture-Range Plot for Rotational-Similarity');
 
 predictedSimilarity = XTest * Weights';
 
@@ -239,14 +239,16 @@ end
 % False positive rate = 1 - Specificity
 figure(3);
 plot(1 - specificityVec, sensitivityVec);
-title('ROC');
+xlabel('0 \leq False Positive Rate(FPR) \leq 1');
+ylabel('0 \leq Sensitivity \leq 1');
+title('ROC Curve');
 
 % Part b. Precision-Recall curve
 % Precision = Positive predictive value (PPV)
 % Recall = Sensitivity !!
 figure(4);
 plot(PPVVec, sensitivityVec);
-title('Precision-Recall curve');
-
-
+xlabel('0 \leq Precision = Positive predictive value (PPV) \leq 1');
+ylabel('0 \leq Recall = Sensitivity \leq 1');
+title('Precision-Recall(PR) Curve');
 
