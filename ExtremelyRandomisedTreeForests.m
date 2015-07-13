@@ -93,52 +93,8 @@ end
 
 
 %% Test
-%Use the weights to define the similarity measure of the test data set.
+% Use the weights to define the similarity measure of the test data set.
 
-% patchPairMatrix = [];
-% testGroundTruthSimilarity = [];
-% for i = 10:12
-%     
-%     imagePath1 = strcat(base_T1,num2str(j),'.TIFF');
-%     imagePath2 = strcat(base_T2,num2str(j),'.TIFF');
-% 
-%     for p = 1:noOfPosPatches
-%         pixel_position_x = randi(256);
-%         pixel_position_y = randi(256);
-%         [similarPatches,disSimilarPatches] = extractPatchesPerPixel(imagePath1, imagePath2, pixel_position_x, pixel_position_y, patchSize, noOfSample);
-%         similarPatches = reshape(cell2mat(similarPatches),[1,2*patchSize*patchSize]); %convert cell to matrix
-%         disSimilarPatches = reshape(cell2mat(disSimilarPatches),[noPatches,2*patchSize*patchSize]);%convert cell to matrix
-%         temp = [similarPatches; disSimilarPatches];
-% 
-%         boolAlignedInd = zeros(noOfSample,1);
-%         boolAlignedInd(1) = 1;
-%         temp = [temp boolAlignedInd];
-%         testGroundTruthSimilarity = [testGroundTruthSimilarity; boolAlignedInd];
-%         patchPairMatrix = [patchPairMatrix; temp];
-%     end
-% end
-% 
-% boolAlignedInd = patchPairMatrix(:,end);
-% XTest = [];
-% noOfTestSample = size(patchPairMatrix,1);
-% for np = 1:noOfTestSample
-%     imagePatch1 = double(patchPairMatrix(np,1:totalPtsInPatch))./255;
-%     imagePatch2 = double(patchPairMatrix(np,totalPtsInPatch+1:end-1))./255;
-%     boolAligned = boolAlignedInd(np);
-%     XTestCodeVecPatchPair = [] ;
-%     for nt=1:totalTreesInForest
-%         structTree = structForest{nt};
-%         [structTree, x] = QuantisizeImagePair(imagePatch1, imagePatch2, boolAligned, structTree, treeDepth, noTreeNodes);
-%         %structForest{nt} = structTree;
-%         XTestCodeVecPatchPair = [XTestCodeVecPatchPair, x];
-%     end
-%     
-%     XTest = [XTest; XTestCodeVecPatchPair];
-%     % Now iterate over the leaves of each tree in the Forest for this particular patch pair to find the vector X.
-% end
-
-
-%% Testing
 XTest = [];
 TestGroundTruthSimilarity = [];
 
@@ -180,9 +136,10 @@ end
 
 %% Capture-Range Plot
 figure(1);
-plot(translations(:,1),translationSimilarity);
-xlabel('Translations');
-ylabel('0 \leq Similarity \leq 1');
+plot3(translations(:,1),translations(:,2),translationSimilarity);
+xlabel('Translations along X');
+ylabel('Translations along Y');
+zlabel('0 \leq Similarity \leq 1');
 title('Capture-Range Plot for Translational Similarity');
 
 figure(2);
