@@ -99,15 +99,17 @@ XTest = [];
 TestGroundTruthSimilarity = [];
 
 % Perform Transformations on Image for Testing.
-translations = [[-60,-60];[-50,-50];[-40,-40];[-30,-30];[-20,-20];[-10,-10];[0,0];[10,10];[20,20];[30,30];[40,40];[50,50];[60,60]];
-totalTransformations = size(translations,1);
+%translations = [[-80,-10];[-70,20];[-60,40];[-50,0];[-40,-40];[-30,-10];[-20,20];[-10,70];[0,0];[10,20];[20,-20];[30,-70];[40,-10];[50,20];[60,-30];[70,40]];
+translations = [[-40,-40];[40,40];[-40,40];[40,-40];[0,0];[-20,-20];[20,20];[-20,20];[20,-20];[-10,-10];[10,10];[-10,10];[10,-10];[-80,-10];[-70,20];[-60,40];[-50,0];[-40,-40];[-30,-10];[10,20];[30,-70];[40,-10];[50,20];[60,-30];[70,40]];
+totalTranlations = size(translations,1);
 
-rotations = [-90;-75;-60;-45;-30;-15;0;15;30;45;60;75;90];
+rotations = [-100;-90;-75;-60;-45;-30;-15;0;5;15;30;45;60;75;90;100];
+totalRotations = size(rotations,1);
 
 translationSimilarity = [];
 rotationSimilarity = [];
 
-for t=1:totalTransformations
+for t=1:totalTranlations
     % Translation of Image
     boolTranslationRotation = true;
     [XTransTest, transGroundTruthSimilarity] = SimilarityTestImage(base_T1, patchSize, noPatches, noOfPosPatches, noOfSample, treeDepth, noTreeNodes, totalTreesInForest, structForest, boolTranslationRotation, translations(t,:));
@@ -119,8 +121,9 @@ for t=1:totalTransformations
     predNormTransSimilarity = predTransSimilarity./(2^treeDepth);
     meanTransSimilarity = mean(predNormTransSimilarity);
     translationSimilarity = [translationSimilarity; meanTransSimilarity];
-
+end
     
+for t=1:totalRotations    
     % Rotation of Image
     boolTranslationRotation = false;
     [XRotTest, rotGroundTruthSimilarity] = SimilarityTestImage(base_T1, patchSize, noPatches, noOfPosPatches, noOfSample, treeDepth, noTreeNodes, totalTreesInForest, structForest, boolTranslationRotation, rotations(t));
@@ -136,7 +139,14 @@ end
 
 %% Capture-Range Plot
 figure(1);
-plot3(translations(:,1),translations(:,2),translationSimilarity);
+%plot3(translations(:,1),translations(:,2),translationSimilarity);
+% Plot a 3D Surface Plot for Translation Similarity
+X = reshape(translations(:,1),[sqrt(totalTranlations),sqrt(totalTranlations)]);
+Y = reshape(translations(:,2),[sqrt(totalTranlations),sqrt(totalTranlations)]);
+Z = reshape(translationSimilarity,[sqrt(totalTranlations),sqrt(totalTranlations)]);
+plot3(translations(:,1),translations(:,2),translationSimilarity,'o-');
+%surf(X,Y,Z);
+
 xlabel('Translations along X');
 ylabel('Translations along Y');
 zlabel('0 \leq Similarity \leq 1');
@@ -161,7 +171,19 @@ predNormSimilarity = predictedSimilarity./(2^treeDepth);
 groundTruth = TestGroundTruthSimilarity; %[1,0,0,1,0,0,1,1,0,1,0,0,1,1,0,0,1,1,0,1,0,1]';
 Predictions = predNormSimilarity; %predictedSimilarity; %[0.6,0.2,0.3,0.5,0.9,0.8,0.6,0.3,0.1,0.2,0.1,0.5,0.8,0.1,0.3,0.7,0.8,0.2,0.4,0.4,0.5,0.4]';
 
-thresholdVec = [0,0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9,1];
+minPredNormSimilarity = min(predNormSimilarity);
+maxPredNormSimilarity = max(predNormSimilarity);
+rangePredNormSimilarity = maxPredNormSimilarity - minPredNormSimilarity;
+stepSize = rangePredNormSimilarity/10;
+
+thresholdVec = [];
+t = minPredNormSimilarity;
+while(t<=maxPredNormSimilarity)
+    thresholdVec = [thresholdVec,t];
+    t = t + stepSize;
+end
+
+%thresholdVec = [0,0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9,1];
 totalThresholds = size(thresholdVec,2);
 
 lstconfMat2by2 = {};
@@ -195,7 +217,7 @@ end
 % Part a. ROC
 % False positive rate = 1 - Specificity
 figure(3);
-plot(1 - specificityVec, sensitivityVec);
+plot(1 - specificityVec, sensitivityVec,'-*');
 xlabel('0 \leq False Positive Rate(FPR) \leq 1');
 ylabel('0 \leq Sensitivity \leq 1');
 title('ROC Curve');
@@ -204,7 +226,7 @@ title('ROC Curve');
 % Precision = Positive predictive value (PPV)
 % Recall = Sensitivity !!
 figure(4);
-plot(PPVVec, sensitivityVec);
+plot(PPVVec, sensitivityVec,'-o');
 xlabel('0 \leq Precision = Positive predictive value (PPV) \leq 1');
 ylabel('0 \leq Recall = Sensitivity \leq 1');
 title('Precision-Recall(PR) Curve');

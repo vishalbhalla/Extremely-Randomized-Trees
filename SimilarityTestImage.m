@@ -6,23 +6,23 @@ testGroundTruthSimilarity = [];
 for i = 10:12
     imagePath = strcat(base_T1,num2str(i),'.TIFF');
     [originalImage, transformedImage] = ImageTransformations(imagePath, transform, boolTranslationRotation);
-    for p = 1:noOfPosPatches
-        pixel_position_x = randi(256);
-        pixel_position_y = randi(256);
-        [similarPatches,disSimilarPatches] = extractPatchesPerPixel(originalImage, transformedImage, pixel_position_x, pixel_position_y, patchSize, noOfSample);
-        similarPatches = reshape(cell2mat(similarPatches),[1,2*patchSize*patchSize]); %convert cell to matrix
-        disSimilarPatches = reshape(cell2mat(disSimilarPatches),[noPatches,2*patchSize*patchSize]);%convert cell to matrix
-        temp = [similarPatches; disSimilarPatches];
 
-        boolAlignedInd = zeros(noOfSample,1);
-        if(transform == 0)
-            boolAlignedInd(1) = 1;
-        end
-        
-        temp = [temp boolAlignedInd];
-        testGroundTruthSimilarity = [testGroundTruthSimilarity; boolAlignedInd];
-        patchPairMatrix = [patchPairMatrix; temp];
+    similarPosPatches = extractSimilarPosPatches(originalImage, transformedImage, patchSize, noOfSample);
+    %similarPatches = reshape(cell2mat(similarPosPatches),[1,2*patchSize*patchSize]); %convert cell to matrix
+    temp = similarPosPatches;
+
+    boolAlignedInd = zeros(noOfSample,1);
+
+    if(size(transform) == 1)
+         boolAlignedInd = ones(noOfSample,1);
+    elseif (transform(1) == 0 && transform(2) == 0)
+            boolAlignedInd = ones(noOfSample,1);
     end
+    
+    temp = [temp boolAlignedInd];
+    testGroundTruthSimilarity = [testGroundTruthSimilarity; boolAlignedInd];
+    patchPairMatrix = [patchPairMatrix; temp];
+
 end
 
 totalPtsInPatch = patchSize * patchSize;
