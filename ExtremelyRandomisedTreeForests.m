@@ -144,8 +144,8 @@ figure(1);
 X = reshape(translations(:,1),[sqrt(totalTranlations),sqrt(totalTranlations)]);
 Y = reshape(translations(:,2),[sqrt(totalTranlations),sqrt(totalTranlations)]);
 Z = reshape(translationSimilarity,[sqrt(totalTranlations),sqrt(totalTranlations)]);
-plot3(translations(:,1),translations(:,2),translationSimilarity,'o-');
-%surf(X,Y,Z);
+scatter3(translations(:,1),translations(:,2),translationSimilarity,'MarkerFaceColor',[0 .75 .75]);
+%plot3(X,Y,Z);
 
 xlabel('Translations along X');
 ylabel('Translations along Y');
@@ -219,7 +219,7 @@ end
 figure(3);
 plot(1 - specificityVec, sensitivityVec,'-*');
 xlabel('0 \leq False Positive Rate(FPR) \leq 1');
-ylabel('0 \leq Sensitivity \leq 1');
+ylabel('0 \leq Specificity \leq 1');
 title('ROC Curve');
 
 % Part b. Precision-Recall curve

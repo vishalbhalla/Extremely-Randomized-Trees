@@ -2,7 +2,7 @@ function [patchSize, treeDepth, noTreeNodes, noOfPosPatches, noPatches, noOfSamp
 %TUNING PARAMETERS
 
 patchSize = 15;
-treeDepth = 4;
+treeDepth = 10;
 noTreeNodes = 2^(treeDepth + 1) - 1;
 totalTreesInForest = 10;
 
